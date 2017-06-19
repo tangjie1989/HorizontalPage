@@ -150,7 +150,7 @@ public class PagingScrollHelper {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             //newState==0表示滚动停止，此时需要处理回滚
-            if (newState == 0 && mOrientation != ORIENTATION.NULL) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE && mOrientation != ORIENTATION.NULL) {
                 boolean move;
                 int vX = 0, vY = 0;
                 if (mOrientation == ORIENTATION.VERTICAL) {
