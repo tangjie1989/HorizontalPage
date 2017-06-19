@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -15,23 +14,22 @@ import android.view.View;
 
 public class PagingScrollHelper {
 
-    RecyclerView mRecyclerView = null;
+    private RecyclerView mRecyclerView;
 
     private MyOnScrollListener mOnScrollListener = new MyOnScrollListener();
-
     private MyOnFlingListener mOnFlingListener = new MyOnFlingListener();
+
     private int offsetY = 0;
     private int offsetX = 0;
 
-    int startY = 0;
-    int startX = 0;
+    private int startY = 0;
+    private int startX = 0;
 
-
-    enum ORIENTATION {
+    private enum ORIENTATION {
         HORIZONTAL, VERTICAL, NULL
     }
 
-    ORIENTATION mOrientation = ORIENTATION.HORIZONTAL;
+    private ORIENTATION mOrientation = ORIENTATION.HORIZONTAL;
 
     public void setUpRecycleView(RecyclerView recycleView) {
         if (recycleView == null) {
@@ -41,7 +39,7 @@ public class PagingScrollHelper {
         //处理滑动
         recycleView.setOnFlingListener(mOnFlingListener);
         //设置滚动监听，记录滚动的状态，和总的偏移量
-        recycleView.setOnScrollListener(mOnScrollListener);
+        recycleView.addOnScrollListener(mOnScrollListener);
         //记录滚动开始的位置
         recycleView.setOnTouchListener(mOnTouchListener);
         //获取滚动的方向
@@ -65,14 +63,12 @@ public class PagingScrollHelper {
             startY = 0;
             offsetX = 0;
             offsetY = 0;
-
         }
-
     }
 
-    ValueAnimator mAnimator = null;
+    private ValueAnimator mAnimator;
 
-    public class MyOnFlingListener extends RecyclerView.OnFlingListener {
+    private class MyOnFlingListener extends RecyclerView.OnFlingListener {
 
         @Override
         public boolean onFling(int velocityX, int velocityY) {
@@ -115,8 +111,7 @@ public class PagingScrollHelper {
 
             //使用动画处理滚动
             if (mAnimator == null) {
-                mAnimator = new ValueAnimator().ofInt(startPoint, endPoint);
-
+                mAnimator = ValueAnimator.ofInt(startPoint, endPoint);
                 mAnimator.setDuration(300);
                 mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
@@ -146,14 +141,12 @@ public class PagingScrollHelper {
                 mAnimator.cancel();
                 mAnimator.setIntValues(startPoint, endPoint);
             }
-
             mAnimator.start();
-
             return true;
         }
     }
 
-    public class MyOnScrollListener extends RecyclerView.OnScrollListener {
+    private class MyOnScrollListener extends RecyclerView.OnScrollListener {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             //newState==0表示滚动停止，此时需要处理回滚
@@ -178,11 +171,8 @@ public class PagingScrollHelper {
                     }
 
                 }
-
                 mOnFlingListener.onFling(vX, vY);
-
             }
-
         }
 
         @Override
@@ -195,9 +185,7 @@ public class PagingScrollHelper {
 
     private MyOnTouchListener mOnTouchListener = new MyOnTouchListener();
 
-
-    public class MyOnTouchListener implements View.OnTouchListener {
-
+    private class MyOnTouchListener implements View.OnTouchListener {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             //手指按下的时候记录开始滚动的坐标
@@ -207,11 +195,10 @@ public class PagingScrollHelper {
             }
             return false;
         }
-
     }
 
     private int getPageIndex() {
-        int p = 0;
+        int p;
         if (mOrientation == ORIENTATION.VERTICAL) {
             p = offsetY / mRecyclerView.getHeight();
         } else {
@@ -221,7 +208,7 @@ public class PagingScrollHelper {
     }
 
     private int getStartPageIndex() {
-        int p = 0;
+        int p;
         if (mOrientation == ORIENTATION.VERTICAL) {
             p = startY / mRecyclerView.getHeight();
         } else {
@@ -230,7 +217,7 @@ public class PagingScrollHelper {
         return p;
     }
 
-    onPageChangeListener mOnPageChangeListener;
+    private onPageChangeListener mOnPageChangeListener;
 
     public void setOnPageChangeListener(onPageChangeListener listener) {
         mOnPageChangeListener = listener;
