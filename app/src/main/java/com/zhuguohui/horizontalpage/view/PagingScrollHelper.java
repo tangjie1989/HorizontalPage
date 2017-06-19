@@ -79,8 +79,8 @@ public class PagingScrollHelper {
             int p = getStartPageIndex();
 
             //记录滚动开始和结束的位置
-            int endPoint = 0;
-            int startPoint = 0;
+            int endPoint;
+            int startPoint;
 
             //如果是垂直方向
             if (mOrientation == ORIENTATION.VERTICAL) {
