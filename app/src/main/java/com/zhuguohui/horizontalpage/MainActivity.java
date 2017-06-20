@@ -1,25 +1,24 @@
 package com.zhuguohui.horizontalpage;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.zhuguohui.horizontalpage.adapter.MyAdapter;
-import com.zhuguohui.horizontalpage.view.DividerGridItemDecoration;
 import com.zhuguohui.horizontalpage.view.DividerItemDecoration;
 import com.zhuguohui.horizontalpage.view.HorizontalPageLayoutManager;
-import com.zhuguohui.horizontalpage.view.PageDecorationLastJudge;
+import com.zhuguohui.horizontalpage.view.MyPagingScrollHelper;
 import com.zhuguohui.horizontalpage.view.PagingItemDecoration;
-import com.zhuguohui.horizontalpage.view.PagingScrollHelper;
 
-public class MainActivity extends AppCompatActivity implements PagingScrollHelper.onPageChangeListener {
+public class MainActivity extends AppCompatActivity implements MyPagingScrollHelper.onPageChangeListener {
     RecyclerView recyclerView;
     MyAdapter myAdapter;
     TextView tv_title;
-    PagingScrollHelper scrollHelper = new PagingScrollHelper();
+    MyPagingScrollHelper scrollHelper = new MyPagingScrollHelper(2, 4);
     RadioGroup rg_layout;
 
     @Override
@@ -38,8 +37,13 @@ public class MainActivity extends AppCompatActivity implements PagingScrollHelpe
         myAdapter = new MyAdapter();
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setAdapter(myAdapter);
+
         scrollHelper.setUpRecycleView(recyclerView);
         scrollHelper.setOnPageChangeListener(this);
+
+//        PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+//        pagerSnapHelper.attachToRecyclerView(recyclerView);
+
         switchLayout(R.id.rb_horizontal_page);
     }
 
@@ -52,15 +56,15 @@ public class MainActivity extends AppCompatActivity implements PagingScrollHelpe
     private PagingItemDecoration pagingItemDecoration = null;
 
     private void init() {
-        hLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+//        hLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        hLinearLayoutManager = new GridLayoutManager(this, 2, LinearLayoutManager.HORIZONTAL, false);
         hDividerItemDecoration = new DividerItemDecoration(this, LinearLayoutManager.HORIZONTAL);
 
         vDividerItemDecoration = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
         vLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-        horizontalPageLayoutManager = new HorizontalPageLayoutManager(3,4);
+        horizontalPageLayoutManager = new HorizontalPageLayoutManager(3, 4);
         pagingItemDecoration = new PagingItemDecoration(this, horizontalPageLayoutManager);
-
     }
 
     private void switchLayout(int checkedId) {
@@ -83,14 +87,11 @@ public class MainActivity extends AppCompatActivity implements PagingScrollHelpe
         if (layoutManager != null) {
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.removeItemDecoration(lastItemDecoration);
-            recyclerView.addItemDecoration(itemDecoration);
-            scrollHelper.updateLayoutManger();
+//            recyclerView.addItemDecoration(itemDecoration);
+//            scrollHelper.updateLayoutManger();
             lastItemDecoration = itemDecoration;
         }
-
-
     }
-
 
     @Override
     protected void onResume() {
