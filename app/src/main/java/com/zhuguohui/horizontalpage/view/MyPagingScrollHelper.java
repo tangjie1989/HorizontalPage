@@ -2,6 +2,7 @@ package com.zhuguohui.horizontalpage.view;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -21,6 +22,9 @@ public class MyPagingScrollHelper {
 
     private static final float MILLISECONDS_PER_INCH = 100f;
 
+    //copy from LinearSmoothScroller
+    private static final double SPAP_TIME_RATIO = 0.5034;
+
     public MyPagingScrollHelper(int pageRows, int pageColumns) {
         mPageRows = pageRows;
         mPageColumns = pageColumns;
@@ -39,6 +43,7 @@ public class MyPagingScrollHelper {
                 int pageWidth = mRecyclerView.getWidth();
                 int realScrolledX = mScrolledX % pageWidth;
                 if (reachEnd() || realScrolledX == 0) {
+                    specifyReachPosition();
                     if (mOnPageChangeListener != null) {
                         mOnPageChangeListener.onPageChange(mScrolledX / pageWidth);
                     }
@@ -51,7 +56,8 @@ public class MyPagingScrollHelper {
                         mRecyclerView.smoothScrollBy(-realScrolledX, 0);
                     }
                 }
-                System.out.println("mScrolledX : " + mScrolledX + " pageIndex : " + (mScrolledX / pageWidth));
+                System.out.println("mScrolledX : " + mScrolledX + " pageIndex : " + (mScrolledX / pageWidth) +
+                        " mLastScrolledPosition : " + mLastScrolledPosition);
             }
         }
 
@@ -135,6 +141,21 @@ public class MyPagingScrollHelper {
         return mLastScrolledPosition;
     }
 
+    private void specifyReachPosition() {
+        if (mRecyclerView != null) {
+            RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+            if (layoutManager instanceof LinearLayoutManager) {
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+                int lastPosition = linearLayoutManager.findFirstVisibleItemPosition();
+                if (lastPosition % getPageItemCount() == 0) {
+                    mLastScrolledPosition = lastPosition;
+                } else {
+                    mLastScrolledPosition = (lastPosition / getPageItemCount() + 1) * getPageItemCount();
+                }
+            }
+        }
+    }
+
     private int getPageItemCount() {
         return mPageRows * mPageColumns;
     }
@@ -160,14 +181,13 @@ public class MyPagingScrollHelper {
                 int[] snapDistances = calculateDistanceToFinalSnap(layoutManager, targetView);
                 final int dx = snapDistances[0];
                 final int dy = snapDistances[1];
-                final int time = calculateTimeForDeceleration(Math.max(Math.abs(dx), Math.abs(dy)));
-                if (time > 0) {
-                    action.update(dx, dy, time, mDecelerateInterpolator);
+                int scrollTime = calculateTimeForScrolling(Math.max(Math.abs(dx), Math.abs(dy)));
+                if (scrollTime > 0) {
+                    final int time = (int) Math.ceil(scrollTime / SPAP_TIME_RATIO);
+                    if (time > 0) {
+                        action.update(dx, dy, time, mDecelerateInterpolator);
+                    }
                 }
-//                final int time = calculateTimeForScrolling(Math.max(Math.abs(dx), Math.abs(dy)));
-//                if (time > 0) {
-//                    action.update(dx, dy, time, mLinearInterpolator);
-//                }
             }
 
             @Override
